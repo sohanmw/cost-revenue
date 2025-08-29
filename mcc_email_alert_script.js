@@ -2,6 +2,11 @@ var EMAIL = 'you@example.com';
 var START_DATE = '2024-01-01';
 var END_DATE = '2024-01-31';
 
+// Google Sheet details used to filter which accounts the script runs on.
+var SPREADSHEET_ID = '1Q3oZPHT6XA2J4QHg-H239DSrXKEGKCktzHozd99RpNg';
+var SHEET_NAME = 'PM&CID';
+var TARGET_COUNTRY = 'Sri Lanka';
+
 function main() {
   var totals = {
     impressions: 0,
@@ -13,7 +18,9 @@ function main() {
     allConversionValue: 0
   };
   var rows = [];
-  var accountIter = MccApp.accounts().get();
+  // Retrieve the list of CIDs whose country in column O is "Sri Lanka".
+  var allowedCids = getCidsForCountry(TARGET_COUNTRY);
+  var accountIter = MccApp.accounts().withIds(allowedCids).get();
   while (accountIter.hasNext()) {
     var account = accountIter.next();
     MccApp.select(account);
@@ -31,6 +38,21 @@ function main() {
   }
   var body = buildEmailBody(totals, rows);
   MailApp.sendEmail(EMAIL, 'MCC Performance ' + START_DATE + ' - ' + END_DATE, body);
+}
+
+// Reads the configured Google Sheet and returns the CIDs for the given country.
+function getCidsForCountry(country) {
+  var sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+  var data = sheet.getRange('A:O').getValues();
+  var ids = [];
+  for (var i = 0; i < data.length; i++) {
+    var cid = data[i][0];      // Column A
+    var rowCountry = data[i][14]; // Column O
+    if (rowCountry === country && cid) {
+      ids.push(cid.toString());
+    }
+  }
+  return ids;
 }
 
 function getStats(startDate, endDate) {
