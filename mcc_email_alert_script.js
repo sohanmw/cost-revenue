@@ -34,9 +34,11 @@ function main() {
 }
 
 function getStats(startDate, endDate) {
+  var formattedStart = startDate.replace(/-/g, '');
+  var formattedEnd = endDate.replace(/-/g, '');
   var query = 'SELECT Impressions, Clicks, Cost, Conversions, ConversionValue, AllConversions, AllConversionValue ' +
               'FROM ACCOUNT_PERFORMANCE_REPORT ' +
-              'DURING ' + startDate + ',' + endDate;
+              'DURING ' + formattedStart + ',' + formattedEnd;
   var report = AdsApp.report(query);
   var rowIter = report.rows();
   if (!rowIter.hasNext()) {
