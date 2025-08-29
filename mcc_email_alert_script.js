@@ -83,7 +83,11 @@ function getStats(startDate, endDate) {
   return {
     impressions: parseInt(row.Impressions.replace(/,/g, ''), 10),
     clicks: parseInt(row.Clicks.replace(/,/g, ''), 10),
-    cost: parseFloat(row.Cost.replace(/,/g, '')) / 1000000,
+    // The Cost field returned by ACCOUNT_PERFORMANCE_REPORT is already in
+    // the account's currency units. Dividing by 1,000,000 (to convert from
+    // micros) results in an incorrectly small value, so we parse the value
+    // directly without scaling.
+    cost: parseFloat(row.Cost.replace(/,/g, '')),
     conversions: parseFloat(row.Conversions.replace(/,/g, '')),
     conversionValue: parseFloat(row.ConversionValue.replace(/,/g, '')),
     allConversions: parseFloat(row.AllConversions.replace(/,/g, '')),
